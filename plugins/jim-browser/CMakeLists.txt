@@ -24,6 +24,7 @@ if(WIN32)
 endif()
 
 include_directories("${CMAKE_CURRENT_BINARY_DIR}")
+include_directories("${CEF_ROOT_DIR}")
 
 # ----------------------------------------------------------------------------
 
@@ -32,10 +33,14 @@ set(jim-browser_LIBRARIES
 	obs-frontend-api
 	)
 
-if(NOT APPLE)
+if(APPLE)
+elseif(WIN32)
 	list(APPEND jim-browser_LIBRARIES
 		${CEF_LIBRARIES})
-	include_directories(${CEF_ROOT_DIR})
+
+	set(obs-browser_PLATFORM_SOURCES
+		jim-browser/jim-browser-source-windows.cpp
+		)
 
 	if(MSVC)
 		string(REPLACE "/MD" "/MT"
@@ -67,7 +72,6 @@ endif()
 set(jim-browser_SOURCES
 	jim-browser/jim-browser-plugin.cpp
 	jim-browser/jim-browser-source.cpp
-	jim-browser/jim-browser-source-windows.cpp
 	jim-browser/browser-scheme.cpp
 	jim-browser/browser-client.cpp
 	jim-browser/browser-app.cpp
@@ -88,6 +92,8 @@ set(jim-browser_HEADERS
 	)
 
 add_library(jim-browser MODULE
+	${obs-browser_PLATFORM_SOURCES}
+	${obs-browser_PLATFORM_HEADERS}
 	${jim-browser_SOURCES}
 	${jim-browser_HEADERS}
 	)

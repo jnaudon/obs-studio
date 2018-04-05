@@ -3,6 +3,10 @@
 #ifdef _MSC_VER
 # pragma warning(push)
 # pragma warning(disable : 4100)
+#elif __APPLE__
+# pragma GCC diagnostic push
+# pragma GCC diagnostic ignored "-Wunused-parameter"
+# pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #endif
 
 #include <include/cef_app.h>
@@ -16,4 +20,6 @@
 
 #ifdef _MSC_VER
 # pragma warning(pop)
+#elif __APPLE__
+# pragma GCC diagnostic pop
 #endif
