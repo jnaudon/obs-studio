@@ -15,13 +15,11 @@ if(NOT CEF_FOUND)
 	return()
 endif()
 
-if(WIN32)
-	option(BROWSER_SHARED_TEXTURE_SUPPORT_ENABLED "Enable shared texture support for the browser plugin" OFF)
+option(BROWSER_SHARED_TEXTURE_SUPPORT_ENABLED "Enable shared texture support for the browser plugin (Win32)" OFF)
 
-	configure_file(
-		"${CMAKE_CURRENT_SOURCE_DIR}/browser-config.h.in"
-		"${CMAKE_CURRENT_BINARY_DIR}/browser-config.h")
-endif()
+configure_file(
+	"${CMAKE_CURRENT_SOURCE_DIR}/browser-config.h.in"
+	"${CMAKE_CURRENT_BINARY_DIR}/browser-config.h")
 
 include_directories("${CMAKE_CURRENT_BINARY_DIR}")
 include_directories("${CEF_ROOT_DIR}")
@@ -33,40 +31,32 @@ set(jim-browser_LIBRARIES
 	obs-frontend-api
 	)
 
-if(APPLE)
-elseif(WIN32)
-	list(APPEND jim-browser_LIBRARIES
-		${CEF_LIBRARIES})
+list(APPEND jim-browser_LIBRARIES
+	${CEF_LIBRARIES})
 
-	set(obs-browser_PLATFORM_SOURCES
-		jim-browser/jim-browser-source-windows.cpp
-		)
+set(obs-browser_PLATFORM_SOURCES
+	jim-browser/jim-browser-source-windows.cpp
+	)
 
-	if(MSVC)
+if(MSVC)
+	string(REPLACE "/MD" "/MT"
+		"CMAKE_C_FLAGS"
+		"${CMAKE_C_FLAGS}")
+
+	string(REPLACE "/MD" "/MT"
+		"CMAKE_CXX_FLAGS"
+		"${CMAKE_CXX_FLAGS}")
+
+	string(TOUPPER "${CMAKE_CONFIGURATION_TYPES}" UPPER_CONFIG_TYPES)
+	foreach(CONFIG_TYPE ${UPPER_CONFIG_TYPES})
 		string(REPLACE "/MD" "/MT"
-			"CMAKE_C_FLAGS"
-			"${CMAKE_C_FLAGS}")
+			"CMAKE_C_FLAGS_${CONFIG_TYPE}"
+			"${CMAKE_C_FLAGS_${CONFIG_TYPE}}")
 
 		string(REPLACE "/MD" "/MT"
-			"CMAKE_CXX_FLAGS"
-			"${CMAKE_CXX_FLAGS}")
-
-		string(TOUPPER "${CMAKE_CONFIGURATION_TYPES}" UPPER_CONFIG_TYPES)
-		foreach(CONFIG_TYPE ${UPPER_CONFIG_TYPES})
-			string(REPLACE "/MD" "/MT"
-				"CMAKE_C_FLAGS_${CONFIG_TYPE}"
-				"${CMAKE_C_FLAGS_${CONFIG_TYPE}}")
-
-			string(REPLACE "/MD" "/MT"
-				"CMAKE_CXX_FLAGS_${CONFIG_TYPE}"
-				"${CMAKE_CXX_FLAGS_${CONFIG_TYPE}}")
-		endforeach()
-	endif()
-else()
-	list(APPEND jim-browser_LIBRARIES
-		${COCOA_FRAMEWORK}
-		${APPKIT_FRAMEWORK}
-		${IOSURFACE_FRAMEWORK})
+			"CMAKE_CXX_FLAGS_${CONFIG_TYPE}"
+			"${CMAKE_CXX_FLAGS_${CONFIG_TYPE}}")
+	endforeach()
 endif()
 
 set(jim-browser_SOURCES
@@ -169,7 +159,7 @@ else()
 		"${CEF_ROOT_DIR}/Release/snapshot_blob.bin"
 		"${CMAKE_BINARY_DIR}/rundir/$<CONFIGURATION>/obs-plugins/${BITS}bit/"
 	)
-
-	install_obs_plugin_with_data(jim-browser data)
-	install_obs_plugin(cef-jimstrap)
 endif()
+
+install_obs_plugin_with_data(jim-browser data)
+install_obs_plugin(cef-jimstrap)

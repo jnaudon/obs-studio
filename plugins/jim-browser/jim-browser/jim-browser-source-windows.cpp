@@ -19,8 +19,10 @@ extern BrowserSource *first_browser;
 /* ========================================================================= */
 
 class BrowserClient_Windows : public BrowserClient {
+#if BROWSER_SHARED_TEXTURE_SUPPORT_ENABLED
 	gs_texture_t *texture = nullptr;
 	void *last_handle = INVALID_HANDLE_VALUE;
+#endif
 	bool sharing_available = false;
 
 public:
@@ -214,7 +216,7 @@ void BrowserSource_Windows::CreateBrowser()
 #if BROWSER_SHARED_TEXTURE_SUPPORT_ENABLED
 		cefBrowserSettings.windowless_frame_rate = 250;
 #else
-		cefBrowserSettings.windowless_frame_rate = fps;
+		cefBrowserSettings.windowless_frame_rate = 60;
 #endif
 
 		cefBrowser = CefBrowserHost::CreateBrowserSync(
@@ -437,6 +439,10 @@ static void BrowserManagerThread(void)
 	settings.log_severity = LOGSEVERITY_VERBOSE;
 	settings.windowless_rendering_enabled = true;
 	settings.no_sandbox = true;
+
+#ifdef __APPLE__
+	//CefString(&settings.framework_dir_path) = "/Library/Frameworks/Chromium Embedded Framework.framework";
+#endif
 
 	BPtr<char> conf_path = obs_module_config_path("");
 	CefString(&settings.cache_path) = conf_path;
