@@ -40,8 +40,8 @@ void BrowserApp::OnBeforeCommandLineProcessing(
 	command_line->AppendSwitch("enable-system-flash");
 }
 
-void BrowserApp::OnContextCreated(CefRefPtr<CefBrowser> browser,
-		CefRefPtr<CefFrame> frame,
+void BrowserApp::OnContextCreated(CefRefPtr<CefBrowser>,
+		CefRefPtr<CefFrame>,
 		CefRefPtr<CefV8Context> context)
 {
 	CefRefPtr<CefV8Value> globalObj = context->GetGlobal();
@@ -181,7 +181,7 @@ bool BrowserApp::OnProcessMessageReceived(CefRefPtr<CefBrowser> browser,
 }
 
 bool BrowserApp::Execute(const CefString &name,
-		CefRefPtr<CefV8Value> object,
+		CefRefPtr<CefV8Value>,
 		const CefV8ValueList &arguments,
 		CefRefPtr<CefV8Value> &,
 		CefString &)

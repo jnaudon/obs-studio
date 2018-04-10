@@ -183,6 +183,8 @@ OBSBasic::OBSBasic(QWidget *parent)
 
 		if (obs_get_video_info(&ovi))
 			ResizePreview(ovi.base_width, ovi.base_height);
+
+		blog(LOG_DEBUG, "TESTING 1111111111111");
 	};
 
 	connect(windowHandle(), &QWindow::screenChanged, displayResize);
@@ -756,8 +758,16 @@ void OBSBasic::LogScenes()
 	blog(LOG_INFO, "------------------------------------------------");
 }
 
-void OBSBasic::DeferredLoad(const QString &file)
+void OBSBasic::DeferredLoad(const QString &file, int deferCount)
 {
+	if (--deferCount > 0) {
+		QMetaObject::invokeMethod(this, "DeferredLoad",
+				Qt::QueuedConnection,
+				Q_ARG(QString, file),
+				Q_ARG(int, deferCount));
+		return;
+	}
+
 	Load(QT_TO_UTF8(file));
 }
 
@@ -1420,7 +1430,24 @@ extern obs_frontend_callbacks *InitializeAPIInterface(OBSBasic *main);
 void OBSBasic::OBSInit()
 {
 	ProfileScope("OBSBasic::OBSInit");
+
+	const char *sceneCollection = config_get_string(App()->GlobalConfig(),
+			"Basic", "SceneCollectionFile");
+	char savePath[512];
+	char fileName[512];
 	int ret;
+
+	if (!sceneCollection)
+		throw "Failed to get scene collection name";
+
+	ret = snprintf(fileName, 512, "obs-studio/basic/scenes/%s.json",
+			sceneCollection);
+	if (ret <= 0)
+		throw "Failed to create scene collection file name";
+
+	ret = GetConfigPath(savePath, sizeof(savePath), fileName);
+	if (ret <= 0)
+		throw "Failed to get scene collection json file path";
 
 	if (!InitBasicConfig())
 		throw "Failed to load basic.ini";
@@ -1646,29 +1673,10 @@ void OBSBasic::OBSInit()
 	ui->actionCheckForUpdates = nullptr;
 #endif
 
-	QTimer::singleShot(1, [this] () {
-		const char *sceneCollection = config_get_string(App()->GlobalConfig(),
-				"Basic", "SceneCollectionFile");
-		char savePath[512];
-		char fileName[512];
-		int ret;
-
-		if (!sceneCollection)
-			return;
-
-		ret = snprintf(fileName, 512, "obs-studio/basic/scenes/%s.json",
-				sceneCollection);
-		if (ret <= 0)
-			return;
-
-		ret = GetConfigPath(savePath, sizeof(savePath), fileName);
-		if (ret <= 0)
-			return;
-
-		QMetaObject::invokeMethod(this, "DeferredLoad",
-				Qt::QueuedConnection,
-				Q_ARG(QString, QT_UTF8(savePath)));
-	});
+	QMetaObject::invokeMethod(this, "DeferredLoad",
+			Qt::QueuedConnection,
+			Q_ARG(QString, QT_UTF8(savePath)),
+			Q_ARG(int, 10));
 }
 
 void OBSBasic::UpdateMultiviewProjectorMenu()

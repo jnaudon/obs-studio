@@ -48,7 +48,7 @@ public:
 			CefRefPtr<CefBrowser> browser,
 			CefRefPtr<CefFrame> frame,
 			CefRefPtr<CefContextMenuParams> params,
-			CefRefPtr<CefMenuModel> model);
+			CefRefPtr<CefMenuModel> model) override;
 
 	/* CefRenderHandler */
 	virtual bool GetViewRect(

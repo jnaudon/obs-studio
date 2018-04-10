@@ -441,7 +441,7 @@ static void BrowserManagerThread(void)
 	settings.no_sandbox = true;
 
 #ifdef __APPLE__
-	//CefString(&settings.framework_dir_path) = "/Library/Frameworks/Chromium Embedded Framework.framework";
+	CefString(&settings.framework_dir_path) = "/Library/Frameworks/Chromium Embedded Framework.framework";
 #endif
 
 	BPtr<char> conf_path = obs_module_config_path("");

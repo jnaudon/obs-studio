@@ -724,7 +724,7 @@ private slots:
 public slots:
 	void on_actionResetTransform_triggered();
 
-	void DeferredLoad(const QString &path);
+	void DeferredLoad(const QString &path, int deferCount);
 
 public:
 	explicit OBSBasic(QWidget *parent = 0);
